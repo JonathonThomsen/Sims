@@ -311,9 +311,7 @@ def drag_coefficient(deployment_angle, altitude, z_velocity):
     local_viscosity = np.interp(altitude, altitudes, viscosities)
     TN = total_area * (local_density ** 2) * (z_velocity ** 2) / (local_viscosity ** 2)
     if 0 <= deployment_angle < 30:
-        low = 0
-        high = 30
-        estimated_drag = deployment_angle *(((10 ** -11) * TN) + 1.7689)
+        estimated_drag = (((10 ** -11) * TN) + 1.7689)
     elif 15 <= deployment_angle < 30:
         estimated_drag = ((10 ** -11) * TN) + 2.0931
     elif 30 <= deployment_angle < 60:
