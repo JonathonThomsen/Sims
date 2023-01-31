@@ -33,7 +33,7 @@ def control_logic(alldata):
     :param alldata:
     :return:
     """
-    apply = True
+    apply = False
     if apply:
         expected_apogee = -((alldata[2] ** 2) / (2 * alldata[1])) + (alldata[3] - start_elevation)
 
@@ -310,16 +310,20 @@ def drag_coefficient(deployment_angle, altitude, z_velocity):
     local_density = np.interp(altitude, altitudes, densities)
     local_viscosity = np.interp(altitude, altitudes, viscosities)
     TN = total_area * (local_density ** 2) * (z_velocity ** 2) / (local_viscosity ** 2)
+
     if 0 <= deployment_angle < 30:
-        low = 0
-        high = 30
-        estimated_drag = deployment_angle *(((10 ** -11) * TN) + 1.7689)
-    elif 15 <= deployment_angle < 30:
-        estimated_drag = ((10 ** -11) * TN) + 2.0931
+        low = deployment_angle-0
+        high = 30-deployment_angle
+        estimated_drag = (high *(((10 ** -11) * TN) + 1.7689)/30)+ (low*(((10 ** -11) * TN) + 2.0931)/30)
     elif 30 <= deployment_angle < 60:
-        estimated_drag = ((10 ** -11) * TN) + 2.6925
-    else:
-        estimated_drag = ((10 ** -11) * TN) + 2.0551
+        low = deployment_angle-30
+        high = 60-deployment_angle
+        estimated_drag = (high*(((10 ** -11) * TN) + 2.0931)/30)+(low*(((10 ** -11) * TN) + 2.6925)/30)
+    else: 
+        low = deployment_angle-60
+        high = 90-deployment_angle
+        estimated_drag = (low*(((10 ** -11) * TN) + 2.6925)/30) + (high*(((10 ** -11) * TN) + 2.0551)/30)
+
     estimated_cd = (2 * estimated_drag) / (local_density * (z_velocity ** 2) * total_area)
     return estimated_cd
 
