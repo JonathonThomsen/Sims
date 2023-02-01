@@ -37,7 +37,7 @@ def control_logic(alldata):
     if apply:
         expected_apogee = -((alldata[2] ** 2) / (2 * alldata[1])) + (alldata[3] - start_elevation)
 
-        if ((expected_apogee - alldata[3]) / alldata[3]) > .33:
+        if ((expected_apogee - alldata[3]) / expected_apogee) >0:
 
             return True, expected_apogee
 
@@ -319,7 +319,7 @@ def drag_coefficient(deployment_angle, altitude, z_velocity):
         low = deployment_angle-30
         high = 60-deployment_angle
         estimated_drag = (high*(((10 ** -11) * TN) + 2.0931)/30)+(low*(((10 ** -11) * TN) + 2.6925)/30)
-    else: 
+    else:
         low = deployment_angle-60
         high = 90-deployment_angle
         estimated_drag = (low*(((10 ** -11) * TN) + 2.6925)/30) + (high*(((10 ** -11) * TN) + 2.0551)/30)
