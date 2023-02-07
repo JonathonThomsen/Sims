@@ -3,6 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
+import json
 
 
 # Hope this works
@@ -396,49 +397,37 @@ def analyze():
 
     plt.show()
 
+with open("SimController.json", "rb") as f:
+    controller = json.load(f)
 
 # Inputs - Rocket and Mission___________________________________________________________________________________________
-body_diameter = 6.17
+geometry = controller["ROCKET_DATA"]
+body_diameter = geometry["BODY_DIAMETER"]
 frontal_area = math.pi * ((body_diameter / 2) ** 2) / 144
-cd = 0.294  # Should be a function of Reynold's number
-start_elevation = 4500
-goal_apogee = 10000 + start_elevation
-engine = "AeroTech_M2400T.csv"
-launch_rail_phi = 1 * math.pi / 180  # 0-90 Degrees, measured from perfectly vertical.
-launch_rail_theta = 0 * math.pi / 180  # 0-360 Degrees, measured from positive x-axis
-spin_vel = 0
-spin_pos = 0
-airbrake_deployment_time = 2  # Seconds
+cd = geometry["INITIAL_CD"]  # Should be a function of Reynold's number
+start_elevation = geometry["ELEVATION"]
+goal_apogee = geometry["GOAL_APOGEE"] + start_elevation
+engine = geometry["ENGINE_FILE"]
+launch_rail_phi = geometry["LAUNCH_RAIL_PHI"] * math.pi / 180  # 0-90 Degrees, measured from perfectly vertical.
+launch_rail_theta = geometry["LAUNCH_RAIL_THETA"] * math.pi / 180  # 0-360 Degrees, measured from positive x-axis
+spin_vel = geometry["SPIN_VEL"]
+spin_pos = geometry["SPIN_POS"]
+airbrake_deployment_time = geometry["AIRBRAKE_DEPLOY_TIME"]  # Seconds
 
 # Environment___________________________________________________________________________________________________________
-
-wind = "static"
+atmosphere = controller["ENVIRONMENT"]
+wind = atmosphere["WIND"]
 altitudes = [1000 * i for i in range(0, 26)]
-densities = [0.002377, 0.002308, 0.002241, 0.002175, 0.002111,
-             0.002048, 0.001987, 0.001927, 0.001869, 0.001812,
-             0.001756, 0.001701, 0.001648, 0.001596, 0.001546,
-             0.001496, 0.001448, 0.001401, 0.001356, 0.001311,
-             0.001267, 0.001225, 0.001184, 0.001144, 0.001105,
-             0.001066]
+densities = atmosphere["DENSITIES"]
 
-viscosities = [3.7372e-7, 3.7172e-7, 3.6971e-7, 3.6770e-7, 3.6568e-7,
-               3.6366e-7, 3.6162e-7, 3.5958e-7, 3.5754e-7, 3.5549e-7,
-               3.5343e-7, 3.5136e-7, 3.4928e-7, 3.4720e-7, 3.4512e-7,
-               3.4302e-7, 3.4092e-7, 3.3881e-7, 3.3669e-7, 3.3457e-7,
-               3.3244e-7, 3.3030e-7, 3.2815e-7, 3.2599e-7, 3.2383e-7,
-               3.2166e-7]
+viscosities = atmosphere["VISCOSITIES"]
 
-gravities = [32.174, 32.171, 32.1679, 32.1648, 32.1617,
-             32.1586, 32.1555, 32.1525, 32.1494, 32.1463,
-             32.1432, 32.1401, 32.1371, 32.134, 32.1309,
-             32.1278, 32.1247, 32.1217, 32.1186, 32.1155,
-             32.1124, 32.1094, 32.1063, 32.1032, 32.1001,
-             32.0971]
+gravities = atmosphere["GRAVITIES"]
 
 # Starting Conditions___________________________________________________________________________________________________
 gravity = np.interp(start_elevation, altitudes, gravities)
-wet_mass = 54 / gravity
-dry_mass = 38 / gravity
+wet_mass = geometry["WET_MASS"] / gravity
+dry_mass = geometry["DRY_MASS"] / gravity
 times, thrusts, mass_flow_rates = thrustcurve(engine)
 angle = 0
 time = 0
