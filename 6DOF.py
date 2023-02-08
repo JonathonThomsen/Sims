@@ -263,7 +263,7 @@ gravity = -32.2
 weight = 54
 
 # Time Step
-h = .00001
+h = .0001
 
 # Forces
 forceX=0
@@ -271,18 +271,18 @@ forceY=0
 forceZ=0
 
 # Moments of Inertia
-Ixxb = 100
-Ixyb = 200
-Ixzb = 300
-Iyxb = 400
-Iyyb = 500
-Iyzb = 600
-Izxb = 700
-Izyb = 800
-Izzb = 900
+Ixxb = 737.53
+Ixyb = 2000
+Ixzb = -0.05
+Iyxb = 0.01
+Iyyb = 795692.04
+Iyzb = 0
+Izxb = -0.017
+Izyb = 0
+Izzb = 795692.04
 
 # Aerodynamic Moments
-Mxb = 1
+Mxb = 0
 Myb = 0
 Mzb = 0
 
@@ -294,7 +294,7 @@ Vwzf = 0
 # Initial Acceleration Conditions
 UDOT = 0
 VDOT = 0
-WDOT = 0
+WDOT = -gravity
 PDOT = 0
 QDOT = 0
 RDOT = 0
@@ -306,7 +306,7 @@ EADOT = 0
 HADOT = 0
 
 # Initial Velocities
-U = 0
+U = 1
 V = 1
 W = 800
 P = .01
@@ -322,7 +322,7 @@ HA = 0
 # Initial Positions
 UPOS = 0
 VPOS = 0
-WPOS = 4500
+WPOS = 7500
 PPOS = 0
 QPOS = 0
 RPOS = 0
@@ -347,7 +347,7 @@ totalvalues.append(value)
 totaldifferentials.append(differential)
 totalintegrals.append(integral)
 times = [0]
-while 0<=integral[3]:
+while 4500<=integral[3]:
     time = time + h
     differential, value, integral = rk4(integral, value, differential, h)
     totaldifferentials.append(differential)
@@ -362,7 +362,7 @@ fig, axs = plt.subplots(nrows=3, ncols=4)
 iteration = 0
 for i in range(0, 3):
     for j in range(0, 4):
-        axs[i, j].plot(times[:-1], [totalintegrals[k][iteration] for k in range(0, len(totalintegrals)-1)])
+        axs[i, j].plot(times,[totalintegrals[k][iteration] for k in range(0, len(totalintegrals))])
         axs[i, j].set_title(labels[iteration])
         iteration = iteration + 1
 
@@ -374,9 +374,9 @@ plt.show()
 newfig = plt.figure()
 
 ax = newfig.add_subplot(111, projection='3d')
-u = [totalintegrals[i][1] for i in range(0, len(totalvalues)-1)]
-v = [totalintegrals[i][2] for i in range(0, len(totalvalues)-1)]
-w = [totalintegrals[i][3] for i in range(0, len(totalvalues)-1)]
+u = [totalintegrals[i][1] for i in range(0, len(totalvalues))]
+v = [totalintegrals[i][2] for i in range(0, len(totalvalues))]
+w = [totalintegrals[i][3] for i in range(0, len(totalvalues))]
 ax.plot(u, v, w, 'red')
 
 plt.autoscale(False)

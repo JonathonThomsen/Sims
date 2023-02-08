@@ -34,12 +34,13 @@ def control_logic(alldata):
     :param alldata:
     :return:
     """
-    apply = False
-    if apply:
+    
+    if VDS:
         expected_apogee = -((alldata[2] ** 2) / (2 * alldata[1])) + (alldata[3] - start_elevation)
 
+        #if alldata[2]<0:
+            #return False, max([flight[i][3]for i in range(0, len(flight))])-start_elevation
         if ((expected_apogee - alldata[3]) / expected_apogee) >0:
-
             return True, expected_apogee
 
         else:
@@ -168,7 +169,7 @@ def iterative_tunnel(previous):
         current.append(deploy_brakes)
 
         flight.append(current)
-        print(current)
+        print(current[3])
         return current
 
 
@@ -366,8 +367,8 @@ def analyze():
     trajectory = fig.add_subplot(2, 3, 1, projection='3d')
     acc = fig.add_subplot(2, 3, 2)
     vel = fig.add_subplot(2, 3, 3)
-    spin = fig.add_subplot(2, 3, 4)
-    brake = fig.add_subplot(2, 3, 5)
+    spin = fig.add_subplot(2, 3, 4,)
+    brake = fig.add_subplot(2, 3, 5, projection = '3d')
     incoming = fig.add_subplot(2, 3, 6)
 
     trajectory.plot([instant[9] for instant in flight], [instant[6] for instant in flight],
@@ -378,10 +379,14 @@ def analyze():
     vel.plot([instant[0] for instant in flight], [instant[2] for instant in flight], label='Velocity (Z)')
     vel.plot([instant[0] for instant in flight], [instant[5] for instant in flight], label='Velocity (Y)')
     vel.plot([instant[0] for instant in flight], [instant[8] for instant in flight], label='Velocity (X)')
+    brake.plot([0 for instant in flight], [math.sin(instant[18]*math.pi/180) for instant in flight], [instant[0] for instant in flight])
+    brake.plot([0 for instant in flight], [-math.sin(instant[18]*math.pi/180) for instant in flight], [instant[0] for instant in flight])
+    brake.plot([math.sin(instant[18]*math.pi/180) for instant in flight], [0 for instant in flight], [instant[0] for instant in flight])
+    brake.plot([-math.sin(instant[18]*math.pi/180) for instant in flight], [0 for instant in flight], [instant[0] for instant in flight])
     spin.plot([instant[0] for instant in flight], [instant[10] for instant in flight], label='Spin Velocity (Deg/s)')
     spin.plot([instant[0] for instant in flight], [(180 * math.cos(instant[11] * math.pi / 180)) for instant in flight],
-              label='Spin Position (Deg)')
-    brake.plot([instant[0] for instant in flight], [instant[18] for instant in flight])
+             label='Spin Position (Deg)')
+    
     incoming.plot([instant[0] for instant in flight], [instant[17] for instant in flight])
     acc.title.set_text("Acceleration (ft/s^2)")
     acc.legend(loc='upper right')
@@ -389,10 +394,10 @@ def analyze():
     vel.title.set_text("Velocity (ft/s)")
     vel.legend(loc='upper right')
 
-    spin.title.set_text("Spin")
+    spin.title.set_text("Roll")
     spin.legend(loc='upper right')
 
-    brake.title.set_text("Airbrake Deployment Angle (Degrees")
+    brake.set_title("Airbrake Deployment")
     incoming.title.set_text("Projected Apogee (Feet)")
 
     plt.show()
@@ -432,22 +437,24 @@ times, thrusts, mass_flow_rates = thrustcurve(engine)
 angle = 0
 time = 0
 # Vertical
-z_accel = 0
-z_vel = 0
+z_accel = geometry["Z_ACCELERATION"]
+z_vel = geometry["Z_VELOCITY"]
 z_pos = start_elevation
-z_mom = 0
+z_mom = geometry["Z_MOMENTUM"]
 drag = 0
 # X-Direction
-x_accel = 0
-x_vel = 0
-x_pos = 0
+x_accel = geometry["X_ACCELERATION"]
+x_vel = geometry["X_VELOCITY"]
+x_pos = geometry["X_POSITION"]
 # Y-Direction
-y_accel = 0
-y_vel = 0
-y_pos = 0
+y_accel = geometry["Y_ACCELERATION"]
+y_vel = geometry["Y_VELOCITY"]
+y_pos = geometry["Y_POSITION"]
 
+settings = controller["COMPUTATION"]
 # Computation Parameters and Startup____________________________________________________________________________________
-comp_type = "iterative"
+comp_type = settings["COMPUTATION_TYPE"]
+VDS = settings["DEPLOY_LOGIC"]
 flight = []
 
 # Main Execution Code___________________________________________________________________________________________________
@@ -462,13 +469,13 @@ if comp_type == "iterative":
         previous_step = temp
         next_step = iterative_tunnel(temp)
         temp = next_step
-        print(temp)
+        print(temp[3])
 elif comp_type == "recursive":
     feet_per_iteration = 75
     max_dt = .1
     temp = [time, z_accel, z_vel, z_pos, y_accel, y_vel, y_pos, x_accel, x_vel, x_pos, spin_vel, spin_pos, thrusts[0],
             wet_mass, mass_flow_rates[0], max_dt, drag, 0, angle, False]
-    print(temp)
+    print(temp[3])
     flight.append(temp)
     recursive_tunnel(temp)
 
