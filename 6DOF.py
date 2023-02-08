@@ -260,7 +260,7 @@ time = 0
 
 # Constants
 gravity = -32.2
-weight = 54
+weight = 20
 
 # Time Step
 h = .0001
@@ -288,13 +288,13 @@ Mzb = 0
 
 # Earth-Fixed Components of Wind
 Vwxf = 0
-Vwyf = 0
+Vwyf = 5
 Vwzf = 0
 
 # Initial Acceleration Conditions
 UDOT = 0
 VDOT = 0
-WDOT = -gravity
+WDOT = gravity
 PDOT = 0
 QDOT = 0
 RDOT = 0
@@ -308,9 +308,9 @@ HADOT = 0
 # Initial Velocities
 U = 1
 V = 1
-W = 800
-P = .01
-Q = 0
+W = 8000
+P = 0.001
+Q = 0.01
 R = 0
 XF = 0
 YF = 0
@@ -322,7 +322,7 @@ HA = 0
 # Initial Positions
 UPOS = 0
 VPOS = 0
-WPOS = 7500
+WPOS = 4500
 PPOS = 0
 QPOS = 0
 RPOS = 0
@@ -374,9 +374,9 @@ plt.show()
 newfig = plt.figure()
 
 ax = newfig.add_subplot(111, projection='3d')
-u = [totalintegrals[i][1] for i in range(0, len(totalvalues))]
-v = [totalintegrals[i][2] for i in range(0, len(totalvalues))]
-w = [totalintegrals[i][3] for i in range(0, len(totalvalues))]
+u = [totalintegrals[i][1] for i in range(0, len(totalvalues)-1)]
+v = [totalintegrals[i][2] for i in range(0, len(totalvalues)-1)]
+w = [totalintegrals[i][3] for i in range(0, len(totalvalues)-1)]
 ax.plot(u, v, w, 'red')
 
 plt.autoscale(False)

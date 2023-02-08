@@ -5,9 +5,6 @@ import numpy as np
 import pandas
 import json
 
-
-# Hope this works
-
 def thrustcurve(engine_file):
     """
     This function takes the engine_file.csv argument (from thrustcurve.org), reads the data, and creates lists of
@@ -20,11 +17,9 @@ def thrustcurve(engine_file):
     thrust_list = thrust_list[3:len(thrust_list)]
     thrust_times = [float(thrust_list[i][0]) for i in range(len(thrust_list))]
     thrusts_curve = [float(thrust_list[i][1]) * 0.2248089431 for i in range(len(thrust_list))]
-    ISP = (np.trapz(thrusts_curve, thrust_times) / (wet_mass - dry_mass)) / np.interp(start_elevation, altitudes,
-                                                                                      gravities)
+    ISP = (np.trapz(thrusts_curve, thrust_times) / (wet_mass - dry_mass)) / np.interp(start_elevation, altitudes, gravities)
     fuel_flow = [(thrust / (ISP * gravity)) for thrust in thrusts_curve]
     return thrust_times, thrusts_curve, fuel_flow
-
 
 def control_logic(alldata):
     """
@@ -38,16 +33,15 @@ def control_logic(alldata):
     if VDS:
         expected_apogee = -((alldata[2] ** 2) / (2 * alldata[1])) + (alldata[3] - start_elevation)
 
-        #if alldata[2]<0:
-            #return False, max([flight[i][3]for i in range(0, len(flight))])-start_elevation
-        if ((expected_apogee - alldata[3]) / expected_apogee) >0:
+        if alldata[2]<0:
+            return False, max([flight[i][3]for i in range(0, len(flight))])-start_elevation
+        if ((expected_apogee - alldata[3]) / expected_apogee) >.30:
             return True, expected_apogee
 
         else:
             return False, expected_apogee
     else:
         return False, 0
-
 
 def iterative_tunnel(previous):
     """
@@ -172,7 +166,6 @@ def iterative_tunnel(previous):
         print(current[3])
         return current
 
-
 def recursive_tunnel(previous):
     """
     The big daddy of this program. The function takes all the startup parameters and recursively finds data for each
@@ -296,7 +289,6 @@ def recursive_tunnel(previous):
         print(current)
         recursive_tunnel(current)
 
-
 def drag_coefficient(deployment_angle, altitude, z_velocity):
     """
     Calculates drag coefficient using the linear relationship between the nondimensional "Thomsen Number"
@@ -329,7 +321,6 @@ def drag_coefficient(deployment_angle, altitude, z_velocity):
     estimated_cd = (2 * estimated_drag) / (local_density * (z_velocity ** 2) * total_area)
     return estimated_cd
 
-
 def environment(case, vertical):
     """
     This function defines the wind conditions at the launch site. Three cases are available: dynamic, random, and other.
@@ -355,11 +346,9 @@ def environment(case, vertical):
 
     return x_wind_velocity, y_wind_velocity, rotational_accel
 
-
 def output(total_flight):
     max_alt = max([instant[3] - start_elevation for instant in total_flight])
     print("Maximum Altitude Reached: ", max_alt)
-
 
 def analyze():
     fig = plt.figure()
@@ -399,6 +388,7 @@ def analyze():
 
     brake.set_title("Airbrake Deployment")
     incoming.title.set_text("Projected Apogee (Feet)")
+    trajectory.title.set_text("Trajectory")
 
     plt.show()
 
